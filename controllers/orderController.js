@@ -101,12 +101,13 @@ exports.checkout = catchAsyncErrors(async (req, res, next) => {
 
   // Card payment: create ONE Stripe Checkout Session covering every shop's items.
   const stripe = getStripe();
+  const currency = process.env.STRIPE_CURRENCY || 'pkr';
   const lineItems = [];
   for (const group of groups.values()) {
     for (const item of group.items) {
       lineItems.push({
         price_data: {
-          currency: 'usd',
+          currency,
           product_data: { name: item.name },
           unit_amount: Math.round(item.price * 100),
         },
@@ -115,7 +116,7 @@ exports.checkout = catchAsyncErrors(async (req, res, next) => {
     }
     lineItems.push({
       price_data: {
-        currency: 'usd',
+        currency,
         product_data: { name: 'Shipping' },
         unit_amount: Math.round(SHIPPING_FLAT_RATE * 100),
       },
