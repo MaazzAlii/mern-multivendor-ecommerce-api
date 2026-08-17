@@ -25,11 +25,8 @@ app.use(async (req, res, next) => {
   }
 });
 
-// IMPORTANT: the Stripe webhook route needs the raw request body to verify its
-// signature, so it's mounted here — before express.json() — with express.raw().
-// If this were mounted after express.json(), the body would already be parsed
-// into an object and Stripe's signature check would fail every time.
-app.use('/api/v1', express.raw({ type: 'application/json' }), webhookRoutes);
+// Mount Stripe webhook route before express.json() so it receives raw body bytes.
+app.use('/api/v1', webhookRoutes);
 
 app.use(express.json());
 
