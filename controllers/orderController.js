@@ -123,12 +123,19 @@ exports.checkout = catchAsyncErrors(async (req, res, next) => {
     });
   }
 
+  const origin = req.headers.origin || (req.headers.referer ? new URL(req.headers.referer).origin : null);
+  let clientUrl = origin || process.env.CLIENT_URL || 'http://localhost:5173';
+  if (!clientUrl.startsWith('http://') && !clientUrl.startsWith('https://')) {
+    clientUrl = `https://${clientUrl}`;
+  }
+  clientUrl = clientUrl.replace(/\/+$/, '');
+
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
     line_items: lineItems,
     metadata: { checkoutGroupId },
-    success_url: `${process.env.CLIENT_URL}/order-success?checkoutGroupId=${checkoutGroupId}`,
-    cancel_url: `${process.env.CLIENT_URL}/checkout`,
+    success_url: `${clientUrl}/order-success?checkoutGroupId=${checkoutGroupId}`,
+    cancel_url: `${clientUrl}/checkout`,
   });
 
   await Order.updateMany({ checkoutGroupId }, { 'paymentInfo.stripeSessionId': session.id });
