@@ -130,6 +130,28 @@ All routes are prefixed with `/api/v1`.
 
 Register with `"role": "seller"` to get seller access, then `POST /shop/new` to create your storefront before adding products. There's no public admin-signup by design — promote a user manually via MongoDB Atlas.
 
+## Demo Accounts & Temporary Data (Seeding)
+
+To populate the database with realistic products, shops, multi-vendor orders, and test accounts:
+
+```bash
+npm run seed
+```
+
+Or call the API seed endpoint directly:
+`GET /api/v1/seed` or `POST /api/v1/seed`
+
+### Pre-configured Demo Accounts
+
+| Role | Email | Password | Details |
+|---|---|---|---|
+| 👑 **Admin** | `admin@gmail.com` | `password123` | Full admin stats, users, shops, products, and orders oversight |
+| 🏪 **Seller 1** | `seller1@gmail.com` | `password123` | **TechZone Official** (Laptops, Audio, Smartphones & Accessories) |
+| 🏪 **Seller 2** | `seller2@gmail.com` | `password123` | **Urban Trends Apparel** (Streetwear, Jackets, Watches, Footwear) |
+| 🏪 **Seller 3** | `seller3@gmail.com` | `password123` | **Pure Organics & Home** (Ceramics, Candles, Skincare, Bamboo) |
+| 🛒 **Buyer 1** | `buyer@gmail.com` | `password123` | **John Doe** (Includes sample Delivered, Shipped, and Processing orders) |
+| 🛒 **Buyer 2** | `user@gmail.com` | `password123` | **Sarah Smith** |
+
 ## Deployment (Vercel)
 
 Pre-configured with `vercel.json` + `api/index.js`.
@@ -139,3 +161,5 @@ Pre-configured with `vercel.json` + `api/index.js`.
 3. Add all env vars from `.env.example`, including the Stripe ones.
 4. Deploy, then set up the Stripe webhook pointing at the deployed URL (see above) — **this requires a redeploy after adding `STRIPE_WEBHOOK_SECRET`**, since Vercel doesn't apply new env vars to an already-built deployment.
 5. Use a MongoDB Atlas cluster with network access allowed from anywhere (`0.0.0.0/0`), set to **never expire**.
+6. Visit `https://your-backend.vercel.app/api/v1/seed` to seed the database immediately if needed.
+

@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "seed": "node seed.js"
   },
   "keywords": ["express", "mongodb", "mongoose", "jwt", "multi-vendor", "ecommerce", "stripe", "rest-api"],
   "author": "Maaz Ali",
