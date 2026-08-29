@@ -1,0 +1,29 @@
+{
+  "project": "Multi-vendor MERN e-commerce API",
+  "phase": "prompts-advanced",
+  "last_updated": "2026-08-30T02:10:00.000Z",
+  "status": "in_progress",
+  "current_prompt": null,
+  "completed_prompts": [],
+  "pending_prompts": [
+    "01_product_pagination_sort_filter.md",
+    "02_profile_update_and_password_change.md",
+    "06_order_cancellation_and_returns.md",
+    "07_seller_analytics.md",
+    "17_related_products.md",
+    "18_review_moderation.md",
+    "04_util_mailer.md",
+    "03_password_reset_flow.md",
+    "05_email_verification.md",
+    "08_validation_middleware.md",
+    "09_rate_limiting.md",
+    "10_refresh_tokens.md",
+    "11_security_headers_sanitization.md",
+    "12_logging.md",
+    "13_testing_setup.md",
+    "16_order_status_email_hooks.md",
+    "14_platform_commission.md",
+    "15_product_variants.md"
+  ],
+  "history": []
+}
