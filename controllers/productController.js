@@ -64,7 +64,13 @@ exports.getProductDetails = catchAsyncErrors(async (req, res, next) => {
   if (!product) {
     return next(new ErrorHandler('Product not found', 404));
   }
-  res.status(200).json({ success: true, product });
+
+  const productObj = product.toObject();
+  if (req.user?.role !== 'admin') {
+    productObj.reviews = (productObj.reviews || []).filter((r) => !r.isHidden);
+  }
+
+  res.status(200).json({ success: true, product: productObj });
 });
 
 // @desc    Create a product under the logged-in seller's shop
@@ -203,4 +209,29 @@ exports.getRelatedProducts = catchAsyncErrors(async (req, res, next) => {
   }
 
   res.status(200).json({ success: true, products });
+});
+
+// @desc    Toggle or set review visibility (Admin only)
+// @route   PUT /api/v1/admin/product/:productId/review/:reviewId/visibility
+// @access  Private/Admin
+exports.toggleReviewVisibility = catchAsyncErrors(async (req, res, next) => {
+  const { productId, reviewId } = req.params;
+  const product = await Product.findById(productId);
+  if (!product) {
+    return next(new ErrorHandler('Product not found', 404));
+  }
+
+  const review = product.reviews.id(reviewId);
+  if (!review) {
+    return next(new ErrorHandler('Review not found', 404));
+  }
+
+  if (typeof req.body.isHidden === 'boolean') {
+    review.isHidden = req.body.isHidden;
+  } else {
+    review.isHidden = !review.isHidden;
+  }
+
+  await product.save();
+  res.status(200).json({ success: true, review });
 });

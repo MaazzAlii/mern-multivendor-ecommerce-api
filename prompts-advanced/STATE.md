@@ -5,21 +5,21 @@
 
 ## Overview Progress
 - **Total Prompts**: 18
-- **Completed**: 5 / 18
+- **Completed**: 6 / 18 (Tier A Complete!)
 - **In Progress**: None
-- **Next**: `18_review_moderation.md`
+- **Next**: `04_util_mailer.md` (Tier B)
 
 ---
 
 ## Detailed Task Breakdown
 
-### Tier A — Polish
+### Tier A — Polish (COMPLETED)
 - [x] `01_product_pagination_sort_filter.md` — Product Pagination, Sorting & Price Filtering
 - [x] `02_profile_update_and_password_change.md` — Profile Update & Password Change
 - [x] `06_order_cancellation_and_returns.md` — Order Cancellation & Return Requests
 - [x] `07_seller_analytics.md` — Seller Analytics Endpoint
 - [x] `17_related_products.md` — Related Products Endpoint
-- [ ] `18_review_moderation.md` — Admin Review Moderation (Hide/Unhide)
+- [x] `18_review_moderation.md` — Admin Review Moderation (Hide/Unhide)
 
 ### Tier B — Production Hardening
 - [ ] `04_util_mailer.md` — Reusable Nodemailer Utility
@@ -48,4 +48,5 @@
 | 2026-08-30 | `02_profile_update_and_password_change.md` | `8d64a32` | Added profile update (`PUT /me`) & password change (`PUT /me/password`) |
 | 2026-08-30 | `06_order_cancellation_and_returns.md` | `d5f03dd` | Added order cancellation with stock restoration and return request system |
 | 2026-08-30 | `07_seller_analytics.md` | `1e20509` | Added seller analytics endpoint (`GET /analytics/shop`) |
-| 2026-08-30 | `17_related_products.md` | Pending | Added related products endpoint (`GET /product/:id/related`) |
+| 2026-08-30 | `17_related_products.md` | `63ad0c2` | Added related products endpoint (`GET /product/:id/related`) |
+| 2026-08-30 | `18_review_moderation.md` | Pending | Added review `isHidden` field, admin moderation endpoint, and public filtering |
