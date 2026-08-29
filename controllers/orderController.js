@@ -3,6 +3,7 @@ const catchAsyncErrors = require('../middleware/catchAsyncErrors');
 const ErrorHandler = require('../utils/ErrorHandler');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const Coupon = require('../models/Coupon');
 const getStripe = require('../utils/stripe');
 
 const SHIPPING_FLAT_RATE = 150;
@@ -51,7 +52,7 @@ async function buildShopGroups(items, next) {
 // @route   POST /api/v1/checkout
 // @access  Private
 exports.checkout = catchAsyncErrors(async (req, res, next) => {
-  const { items, shippingAddress, paymentMethod } = req.body;
+  const { items, shippingAddress, paymentMethod, couponCode } = req.body;
 
   if (!Array.isArray(items) || items.length === 0) {
     return next(new ErrorHandler('items array is required', 400));
@@ -66,12 +67,45 @@ exports.checkout = catchAsyncErrors(async (req, res, next) => {
   const groups = await buildShopGroups(items, next);
   if (groups === null) return; // buildShopGroups already responded with an error
 
+  // Coupons are validated and applied server-side only — the client sends just the
+  // code, never a discount amount, so a buyer can't manipulate what gets charged.
+  let coupon = null;
+  if (couponCode) {
+    coupon = await Coupon.findOne({ name: couponCode.toUpperCase(), isActive: true });
+    if (!coupon) return next(new ErrorHandler('Invalid or expired coupon code', 400));
+    if (coupon.expiresAt && coupon.expiresAt.getTime() < Date.now()) {
+      return next(new ErrorHandler('This coupon has expired', 400));
+    }
+    const shopKey = coupon.shop.toString();
+    if (!groups.has(shopKey)) {
+      return next(new ErrorHandler('This coupon does not apply to any shop in your cart', 400));
+    }
+    const group = groups.get(shopKey);
+    if (group.itemsPrice < coupon.minAmount) {
+      return next(new ErrorHandler(`This coupon requires a minimum order of Rs ${coupon.minAmount}`, 400));
+    }
+  }
+
   const checkoutGroupId = new mongoose.Types.ObjectId().toString();
   const createdOrders = [];
 
   for (const [shopId, group] of groups.entries()) {
     const shippingPrice = SHIPPING_FLAT_RATE;
-    const totalPrice = group.itemsPrice + shippingPrice;
+    let discountAmount = 0;
+    let appliedCouponCode;
+
+    if (coupon && shopId === coupon.shop.toString()) {
+      discountAmount = Math.round(group.itemsPrice * (coupon.discountPercent / 100));
+      if (coupon.maxAmount) discountAmount = Math.min(discountAmount, coupon.maxAmount);
+      appliedCouponCode = coupon.name;
+
+      // Spread the discount proportionally across each line item so the amount
+      // charged via Stripe (computed from these same items below) matches exactly.
+      const ratio = discountAmount / group.itemsPrice;
+      group.items = group.items.map((item) => ({ ...item, price: Math.round(item.price * (1 - ratio) * 100) / 100 }));
+    }
+
+    const totalPrice = group.itemsPrice - discountAmount + shippingPrice;
 
     const order = await Order.create({
       checkoutGroupId,
@@ -82,6 +116,8 @@ exports.checkout = catchAsyncErrors(async (req, res, next) => {
       itemsPrice: group.itemsPrice,
       shippingPrice,
       totalPrice,
+      couponCode: appliedCouponCode,
+      discountAmount,
       paymentInfo: { method: paymentMethod, status: 'Not Paid' },
     });
     createdOrders.push(order);
