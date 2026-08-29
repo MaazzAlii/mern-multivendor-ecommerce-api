@@ -53,6 +53,13 @@ const orderSchema = new mongoose.Schema(
     },
     paidAt: Date,
     deliveredAt: Date,
+    couponCode: {
+      type: String,
+    },
+    discountAmount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
