@@ -10,6 +10,13 @@ const shopRoutes = require('./routes/shopRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
+const couponRoutes = require('./routes/couponRoutes');
+const eventRoutes = require('./routes/eventRoutes');
+const withdrawRoutes = require('./routes/withdrawRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
+const conversationRoutes = require('./routes/conversationRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 
 const app = express();
 
@@ -65,6 +72,13 @@ app.use('/api/v1', shopRoutes);
 app.use('/api/v1', productRoutes);
 app.use('/api/v1', orderRoutes);
 app.use('/api/v1', adminRoutes);
+app.use('/api/v1', uploadRoutes);
+app.use('/api/v1', couponRoutes);
+app.use('/api/v1', eventRoutes);
+app.use('/api/v1', withdrawRoutes);
+app.use('/api/v1', wishlistRoutes);
+app.use('/api/v1', conversationRoutes);
+app.use('/api/v1', messageRoutes);
 
 app.use((req, res, next) => {
   res.status(404).json({ success: false, message: `Route not found - ${req.originalUrl}` });
