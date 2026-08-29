@@ -298,3 +298,38 @@ exports.getAllOrdersAdmin = catchAsyncErrors(async (req, res, next) => {
 
   res.status(200).json({ success: true, count: orders.length, totalRevenue, orders });
 });
+
+// @desc    Cancel an order (buyer only, when in Processing status)
+// @route   PUT /api/v1/order/:id/cancel
+// @access  Private
+exports.cancelOrder = catchAsyncErrors(async (req, res, next) => {
+  const order = await Order.findById(req.params.id);
+  if (!order) {
+    return next(new ErrorHandler('Order not found', 404));
+  }
+
+  if (order.buyer.toString() !== req.user.id) {
+    return next(new ErrorHandler('Not authorized to cancel this order', 403));
+  }
+
+  if (order.status !== 'Processing') {
+    return next(
+      new ErrorHandler(
+        'Order can only be cancelled while in Processing status. Request a return instead if already shipped.',
+        400
+      )
+    );
+  }
+
+  order.status = 'Cancelled';
+
+  // Restore stock for cancelled items
+  for (const item of order.items) {
+    await Product.findByIdAndUpdate(item.product, {
+      $inc: { stock: item.quantity, soldOut: -item.quantity },
+    });
+  }
+
+  await order.save();
+  res.status(200).json({ success: true, order });
+});

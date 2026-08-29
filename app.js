@@ -17,6 +17,7 @@ const withdrawRoutes = require('./routes/withdrawRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const conversationRoutes = require('./routes/conversationRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const returnRoutes = require('./routes/returnRoutes');
 
 const app = express();
 
@@ -79,6 +80,7 @@ app.use('/api/v1', withdrawRoutes);
 app.use('/api/v1', wishlistRoutes);
 app.use('/api/v1', conversationRoutes);
 app.use('/api/v1', messageRoutes);
+app.use('/api/v1', returnRoutes);
 
 app.use((req, res, next) => {
   res.status(404).json({ success: false, message: `Route not found - ${req.originalUrl}` });
