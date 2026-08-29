@@ -2,14 +2,29 @@ const crypto = require('crypto');
 const catchAsyncErrors = require('../middleware/catchAsyncErrors');
 const ErrorHandler = require('../utils/ErrorHandler');
 const User = require('../models/User');
+const RefreshToken = require('../models/RefreshToken');
 const sendEmail = require('../utils/mailer');
 
-const sendToken = (user, statusCode, res) => {
-  const token = user.getJWTToken();
+const sendToken = async (user, statusCode, res) => {
+  const accessToken = user.getJWTToken();
+  const rawRefreshToken = crypto.randomBytes(40).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(rawRefreshToken).digest('hex');
+
+  const days = parseInt(process.env.JWT_REFRESH_EXPIRE_DAYS, 10) || 7;
+  const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
+  await RefreshToken.create({
+    user: user._id,
+    tokenHash,
+    expiresAt,
+  });
+
   res.status(statusCode).json({
     success: true,
     user: { _id: user._id, name: user.name, email: user.email, role: user.role, shop: user.shop },
-    token,
+    token: accessToken,
+    accessToken,
+    refreshToken: rawRefreshToken,
   });
 };
 
@@ -53,7 +68,7 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
     `,
   });
 
-  sendToken(user, 201, res);
+  await sendToken(user, 201, res);
 });
 
 // @desc    Log in a user
@@ -76,7 +91,7 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler('Invalid email or password', 401));
   }
 
-  sendToken(user, 200, res);
+  await sendToken(user, 200, res);
 });
 
 // @desc    Get logged-in user's profile
@@ -294,4 +309,75 @@ exports.resendVerificationEmail = catchAsyncErrors(async (req, res, next) => {
   });
 
   res.status(200).json({ success: true, message: 'Verification email sent' });
+});
+
+// @desc    Refresh access token and rotate refresh token
+// @route   POST /api/v1/refresh-token
+// @access  Public
+exports.refreshAccessToken = catchAsyncErrors(async (req, res, next) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    return next(new ErrorHandler('Refresh token is required', 400));
+  }
+
+  const incomingHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+
+  const tokenDoc = await RefreshToken.findOne({
+    tokenHash: incomingHash,
+    revoked: false,
+    expiresAt: { $gt: Date.now() },
+  });
+
+  if (!tokenDoc) {
+    return next(new ErrorHandler('Invalid or expired refresh token', 401));
+  }
+
+  tokenDoc.revoked = true;
+  await tokenDoc.save();
+
+  const user = await User.findById(tokenDoc.user);
+  if (!user) {
+    return next(new ErrorHandler('User no longer exists', 401));
+  }
+
+  const newAccessToken = user.getJWTToken();
+  const newRawRefreshToken = crypto.randomBytes(40).toString('hex');
+  const newHash = crypto.createHash('sha256').update(newRawRefreshToken).digest('hex');
+
+  const days = parseInt(process.env.JWT_REFRESH_EXPIRE_DAYS, 10) || 7;
+  const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
+  await RefreshToken.create({
+    user: user._id,
+    tokenHash: newHash,
+    expiresAt,
+  });
+
+  res.status(200).json({
+    success: true,
+    token: newAccessToken,
+    accessToken: newAccessToken,
+    refreshToken: newRawRefreshToken,
+  });
+});
+
+// @desc    Log out user by revoking current refresh token
+// @route   POST /api/v1/logout
+// @access  Private
+exports.logout = catchAsyncErrors(async (req, res, next) => {
+  const { refreshToken } = req.body;
+  if (refreshToken) {
+    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    await RefreshToken.findOneAndUpdate({ tokenHash }, { revoked: true });
+  }
+
+  res.status(200).json({ success: true, message: 'Logged out successfully' });
+});
+
+// @desc    Log out from all active sessions
+// @route   POST /api/v1/logout-all
+// @access  Private
+exports.logoutAllSessions = catchAsyncErrors(async (req, res, next) => {
+  await RefreshToken.updateMany({ user: req.user.id, revoked: false }, { revoked: true });
+  res.status(200).json({ success: true, message: 'Logged out from all sessions' });
 });

@@ -15,14 +15,21 @@ exports.isAuthenticatedUser = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler('Please log in to access this resource', 401));
   }
 
-  const decodedData = jwt.verify(token, process.env.JWT_SECRET);
-  req.user = await User.findById(decodedData.id);
+  try {
+    const decodedData = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await User.findById(decodedData.id);
 
-  if (!req.user) {
-    return next(new ErrorHandler('User belonging to this token no longer exists', 401));
+    if (!req.user) {
+      return next(new ErrorHandler('User belonging to this token no longer exists', 401));
+    }
+
+    next();
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return next(new ErrorHandler('Access token expired', 401));
+    }
+    return next(new ErrorHandler('Invalid access token', 401));
   }
-
-  next();
 });
 
 exports.authorizeRoles = (...roles) => {

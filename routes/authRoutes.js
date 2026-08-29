@@ -10,6 +10,9 @@ const {
   resetPassword,
   verifyEmail,
   resendVerificationEmail,
+  refreshAccessToken,
+  logout,
+  logoutAllSessions,
 } = require('../controllers/authController');
 const { body } = require('express-validator');
 const validate = require('../middleware/validate');
@@ -37,6 +40,9 @@ router.route('/login').post(
   ]),
   loginUser
 );
+router.route('/refresh-token').post(refreshAccessToken);
+router.route('/logout').post(isAuthenticatedUser, logout);
+router.route('/logout-all').post(isAuthenticatedUser, logoutAllSessions);
 router.route('/verify-email/:token').get(verifyEmail);
 router.route('/resend-verification').post(isAuthenticatedUser, resendVerificationEmail);
 router.route('/forgot-password').post(authLimiter, forgotPassword);
