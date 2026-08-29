@@ -5,9 +5,9 @@
 
 ## Overview Progress
 - **Total Prompts**: 18
-- **Completed**: 13 / 18
+- **Completed**: 14 / 18
 - **In Progress**: None
-- **Next**: `12_logging.md`
+- **Next**: `13_testing_setup.md`
 
 ---
 
@@ -29,7 +29,7 @@
 - [x] `09_rate_limiting.md` — API Rate Limiting
 - [x] `10_refresh_tokens.md` — JWT Refresh Tokens
 - [x] `11_security_headers_sanitization.md` — Security Headers & Data Sanitization
-- [ ] `12_logging.md` — Structured Logging with Winston & Morgan
+- [x] `12_logging.md` — Structured Logging with Winston & Morgan
 - [ ] `13_testing_setup.md` — Automated Testing Setup (Jest & Supertest)
 - [ ] `16_order_status_email_hooks.md` — Order Status Email Notifications
 
@@ -56,4 +56,5 @@
 | 2026-08-30 | `08_validation_middleware.md` | `6596f1a` | Added input validation middleware using express-validator across core routes |
 | 2026-08-30 | `09_rate_limiting.md` | `c16b14d` | Added express-rate-limit middleware with strict auth rate limits and global API limit |
 | 2026-08-30 | `10_refresh_tokens.md` | `d3d3fb2` | Added RefreshToken model, 15m access token + 7d refresh token rotation, and logout endpoints |
-| 2026-08-30 | `11_security_headers_sanitization.md` | Pending | Added Helmet security headers, Mongo Sanitize for NoSQL injection, and XSS sanitization |
+| 2026-08-30 | `11_security_headers_sanitization.md` | `d771997` | Added Helmet security headers, Mongo Sanitize for NoSQL injection, and XSS sanitization |
+| 2026-08-30 | `12_logging.md` | Pending | Added Winston structured logger and Morgan HTTP request logging |

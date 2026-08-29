@@ -1,4 +1,5 @@
 const ErrorHandler = require('../utils/ErrorHandler');
+const logger = require('../utils/logger');
 
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
@@ -27,6 +28,8 @@ module.exports = (err, req, res, next) => {
   if (err.name === 'TokenExpiredError') {
     err = new ErrorHandler('JSON Web Token has expired. Please log in again', 401);
   }
+
+  logger.error(err.message, { stack: err.stack, path: req.path, method: req.method, statusCode: err.statusCode });
 
   res.status(err.statusCode).json({
     success: false,

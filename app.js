@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const morgan = require('morgan');
 
 const errorMiddleware = require('./middleware/error');
 const connectDatabase = require('./config/db');
@@ -27,6 +28,7 @@ const { generalApiLimiter } = require('./middleware/rateLimiters');
 
 const app = express();
 
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(helmet());
 app.use(cors());
 
