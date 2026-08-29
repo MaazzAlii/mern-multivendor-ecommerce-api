@@ -19,10 +19,15 @@ const conversationRoutes = require('./routes/conversationRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const returnRoutes = require('./routes/returnRoutes');
 
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+
 const { generalApiLimiter } = require('./middleware/rateLimiters');
 
 const app = express();
 
+app.use(helmet());
 app.use(cors());
 
 // Connect to MongoDB on each request (serverless-safe).
@@ -39,6 +44,8 @@ app.use(async (req, res, next) => {
 app.use('/api/v1', webhookRoutes);
 
 app.use(express.json());
+app.use(mongoSanitize());
+app.use(xss());
 app.use(generalApiLimiter);
 
 app.get('/', (req, res) => {
