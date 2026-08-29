@@ -14,10 +14,10 @@ The reference tutorial for this project (Becodemy Multi-Vendor E-commerce) also 
 
 ## Acceptance Criteria
 
-- ✅ **Multi-vendor auth flow (buyer, seller, admin)** — one `User` model, `role` enum, JWT + `authorizeRoles` middleware
-- ✅ **Payment integration** — Stripe Checkout (hosted page, redirect-based — no frontend Stripe SDK needed) + Cash on Delivery as a fallback; webhook confirms payment and releases stock only once paid
-- ✅ **Product and order lifecycle fully implemented** — sellers create/manage products under their shop; checkout splits a multi-shop cart into one order per shop; sellers advance order status (`Processing → Shipped → Delivered`, or `Cancelled`); buyers leave reviews only on delivered orders (verified purchase)
-- ✅ **Case study document** — see the paired case study doc
+- **Multi-vendor auth flow (buyer, seller, admin)** — one `User` model, `role` enum, JWT + `authorizeRoles` middleware
+- **Payment integration** — Stripe Checkout (hosted page, redirect-based — no frontend Stripe SDK needed) + Cash on Delivery as a fallback; webhook confirms payment and releases stock only once paid
+- **Product and order lifecycle fully implemented** — sellers create/manage products under their shop; checkout splits a multi-shop cart into one order per shop; sellers advance order status (`Processing → Shipped → Delivered`, or `Cancelled`); buyers leave reviews only on delivered orders (verified purchase)
+- **Case study document** — see the paired case study doc
 
 ## Tech Stack
 
