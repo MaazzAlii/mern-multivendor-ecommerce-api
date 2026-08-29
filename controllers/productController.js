@@ -167,3 +167,40 @@ exports.createReview = catchAsyncErrors(async (req, res, next) => {
 
   res.status(201).json({ success: true, product });
 });
+
+// @desc    Get related products (same category first, top up with same shop)
+// @route   GET /api/v1/product/:id/related
+// @access  Public
+exports.getRelatedProducts = catchAsyncErrors(async (req, res, next) => {
+  const currentProduct = await Product.findById(req.params.id);
+  if (!currentProduct) {
+    return next(new ErrorHandler('Product not found', 404));
+  }
+
+  let products = await Product.find({
+    _id: { $ne: currentProduct._id },
+    category: currentProduct.category,
+    isActive: true,
+  })
+    .populate('shop', 'name')
+    .sort({ ratings: -1 })
+    .limit(6);
+
+  if (products.length < 6) {
+    const existingIds = [currentProduct._id, ...products.map((p) => p._id)];
+    const additionalCount = 6 - products.length;
+
+    const shopProducts = await Product.find({
+      _id: { $nin: existingIds },
+      shop: currentProduct.shop,
+      isActive: true,
+    })
+      .populate('shop', 'name')
+      .sort({ ratings: -1 })
+      .limit(additionalCount);
+
+    products = [...products, ...shopProducts];
+  }
+
+  res.status(200).json({ success: true, products });
+});

@@ -1,17 +1,17 @@
 {
   "project": "Multi-vendor MERN e-commerce API",
   "phase": "prompts-advanced",
-  "last_updated": "2026-08-30T02:13:17.000Z",
+  "last_updated": "2026-08-30T02:13:59.000Z",
   "status": "in_progress",
   "current_prompt": null,
   "completed_prompts": [
     "01_product_pagination_sort_filter.md",
     "02_profile_update_and_password_change.md",
     "06_order_cancellation_and_returns.md",
-    "07_seller_analytics.md"
+    "07_seller_analytics.md",
+    "17_related_products.md"
   ],
   "pending_prompts": [
-    "17_related_products.md",
     "18_review_moderation.md",
     "04_util_mailer.md",
     "03_password_reset_flow.md",
@@ -64,6 +64,15 @@
       "files_changed": [
         "controllers/orderController.js",
         "routes/orderRoutes.js"
+      ]
+    },
+    {
+      "prompt": "17_related_products.md",
+      "status": "completed",
+      "timestamp": "2026-08-30T02:13:59.000Z",
+      "files_changed": [
+        "controllers/productController.js",
+        "routes/productRoutes.js"
       ]
     }
   ]
