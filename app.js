@@ -19,6 +19,8 @@ const conversationRoutes = require('./routes/conversationRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const returnRoutes = require('./routes/returnRoutes');
 
+const { generalApiLimiter } = require('./middleware/rateLimiters');
+
 const app = express();
 
 app.use(cors());
@@ -37,6 +39,7 @@ app.use(async (req, res, next) => {
 app.use('/api/v1', webhookRoutes);
 
 app.use(express.json());
+app.use(generalApiLimiter);
 
 app.get('/', (req, res) => {
   res.status(200).json({

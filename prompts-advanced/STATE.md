@@ -5,9 +5,9 @@
 
 ## Overview Progress
 - **Total Prompts**: 18
-- **Completed**: 10 / 18
+- **Completed**: 11 / 18
 - **In Progress**: None
-- **Next**: `09_rate_limiting.md`
+- **Next**: `10_refresh_tokens.md`
 
 ---
 
@@ -26,7 +26,7 @@
 - [x] `03_password_reset_flow.md` — Password Reset Flow
 - [x] `05_email_verification.md` — Email Verification Flow
 - [x] `08_validation_middleware.md` — Request Validation Middleware
-- [ ] `09_rate_limiting.md` — API Rate Limiting
+- [x] `09_rate_limiting.md` — API Rate Limiting
 - [ ] `10_refresh_tokens.md` — JWT Refresh Tokens
 - [ ] `11_security_headers_sanitization.md` — Security Headers & Data Sanitization
 - [ ] `12_logging.md` — Structured Logging with Winston & Morgan
@@ -53,4 +53,5 @@
 | 2026-08-30 | `04_util_mailer.md` | `bc87a66` | Added reusable Nodemailer `sendEmail` utility and SMTP env configs |
 | 2026-08-30 | `03_password_reset_flow.md` | `ae0cfca` | Added forgot password email link generation and reset password token flow |
 | 2026-08-30 | `05_email_verification.md` | `69d5aed` | Added email verification token generation, verification endpoint, and resend verification email |
-| 2026-08-30 | `08_validation_middleware.md` | Pending | Added input validation middleware using express-validator across core routes |
+| 2026-08-30 | `08_validation_middleware.md` | `6596f1a` | Added input validation middleware using express-validator across core routes |
+| 2026-08-30 | `09_rate_limiting.md` | Pending | Added express-rate-limit middleware with strict auth rate limits and global API limit |
