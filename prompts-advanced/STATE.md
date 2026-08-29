@@ -5,9 +5,9 @@
 
 ## Overview Progress
 - **Total Prompts**: 18
-- **Completed**: 6 / 18 (Tier A Complete!)
+- **Completed**: 7 / 18
 - **In Progress**: None
-- **Next**: `04_util_mailer.md` (Tier B)
+- **Next**: `03_password_reset_flow.md`
 
 ---
 
@@ -22,7 +22,7 @@
 - [x] `18_review_moderation.md` — Admin Review Moderation (Hide/Unhide)
 
 ### Tier B — Production Hardening
-- [ ] `04_util_mailer.md` — Reusable Nodemailer Utility
+- [x] `04_util_mailer.md` — Reusable Nodemailer Utility
 - [ ] `03_password_reset_flow.md` — Password Reset Flow
 - [ ] `05_email_verification.md` — Email Verification Flow
 - [ ] `08_validation_middleware.md` — Request Validation Middleware
@@ -49,4 +49,5 @@
 | 2026-08-30 | `06_order_cancellation_and_returns.md` | `d5f03dd` | Added order cancellation with stock restoration and return request system |
 | 2026-08-30 | `07_seller_analytics.md` | `1e20509` | Added seller analytics endpoint (`GET /analytics/shop`) |
 | 2026-08-30 | `17_related_products.md` | `63ad0c2` | Added related products endpoint (`GET /product/:id/related`) |
-| 2026-08-30 | `18_review_moderation.md` | Pending | Added review `isHidden` field, admin moderation endpoint, and public filtering |
+| 2026-08-30 | `18_review_moderation.md` | `c3b928a` | Added review `isHidden` field, admin moderation endpoint, and public filtering |
+| 2026-08-30 | `04_util_mailer.md` | Pending | Added reusable Nodemailer `sendEmail` utility and SMTP env configs |

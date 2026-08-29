@@ -8,7 +8,16 @@
     "dev": "nodemon server.js",
     "seed": "node seed.js"
   },
-  "keywords": ["express", "mongodb", "mongoose", "jwt", "multi-vendor", "ecommerce", "stripe", "rest-api"],
+  "keywords": [
+    "express",
+    "mongodb",
+    "mongoose",
+    "jwt",
+    "multi-vendor",
+    "ecommerce",
+    "stripe",
+    "rest-api"
+  ],
   "author": "Maaz Ali",
   "license": "MIT",
   "dependencies": {
@@ -19,6 +28,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.2",
+    "nodemailer": "^9.0.6",
     "stripe": "^16.8.0"
   },
   "devDependencies": {
