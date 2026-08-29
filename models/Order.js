@@ -7,6 +7,9 @@ const orderItemSchema = new mongoose.Schema(
     image: { type: String, default: '' },
     quantity: { type: Number, required: true, min: 1 },
     price: { type: Number, required: true },
+    variantLabel: { type: String, default: '' },
+    variantOptionId: { type: String, default: '' },
+    variantSku: { type: String, default: '' },
   },
   { _id: false }
 );

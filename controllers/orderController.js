@@ -11,6 +11,31 @@ const sendEmail = require('../utils/mailer');
 const SHIPPING_FLAT_RATE = 150;
 
 /**
+ * Helper to adjust product or variant stock and soldOut counters safely.
+ */
+async function adjustProductStock(item, quantityChange) {
+  const product = await Product.findById(item.product);
+  if (!product) return;
+
+  if (item.variantOptionId && Array.isArray(product.variants) && product.variants.length > 0) {
+    for (const vg of product.variants) {
+      for (const opt of vg.options || []) {
+        if (opt._id.toString() === item.variantOptionId.toString()) {
+          opt.stock = Math.max(0, opt.stock + quantityChange);
+        }
+      }
+    }
+    product.stock = Math.max(0, product.stock + quantityChange);
+    product.soldOut = Math.max(0, product.soldOut - quantityChange);
+    await product.save();
+  } else {
+    await Product.findByIdAndUpdate(item.product, {
+      $inc: { stock: quantityChange, soldOut: -quantityChange },
+    });
+  }
+}
+
+/**
  * Groups cart items by shop and computes per-shop pricing.
  * Throws (via ErrorHandler passed to next) if any product is missing or under-stocked.
  */
@@ -23,9 +48,43 @@ async function buildShopGroups(items, next) {
       next(new ErrorHandler(`Product not found: ${cartItem.productId}`, 404));
       return null;
     }
-    if (product.stock < cartItem.quantity) {
-      next(new ErrorHandler(`Insufficient stock for "${product.name}"`, 400));
-      return null;
+
+    let selectedOption = null;
+    let selectedGroup = null;
+
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      if (!cartItem.variantOptionId && !cartItem.variantOptionSku) {
+        next(new ErrorHandler(`Please select a variant option for "${product.name}"`, 400));
+        return null;
+      }
+      for (const g of product.variants) {
+        for (const opt of g.options || []) {
+          if (
+            (cartItem.variantOptionId && opt._id.toString() === cartItem.variantOptionId.toString()) ||
+            (cartItem.variantOptionSku && opt.sku === cartItem.variantOptionSku)
+          ) {
+            selectedOption = opt;
+            selectedGroup = g;
+            break;
+          }
+        }
+        if (selectedOption) break;
+      }
+
+      if (!selectedOption) {
+        next(new ErrorHandler(`Selected variant option not found for "${product.name}"`, 400));
+        return null;
+      }
+
+      if (selectedOption.stock < cartItem.quantity) {
+        next(new ErrorHandler(`Insufficient stock for "${product.name} (${selectedOption.label})"`, 400));
+        return null;
+      }
+    } else {
+      if (product.stock < cartItem.quantity) {
+        next(new ErrorHandler(`Insufficient stock for "${product.name}"`, 400));
+        return null;
+      }
     }
 
     const shopId = product.shop.toString();
@@ -34,13 +93,20 @@ async function buildShopGroups(items, next) {
     }
 
     const group = groups.get(shopId);
-    const lineTotal = product.discountPrice * cartItem.quantity;
+    const unitPrice = selectedOption
+      ? product.discountPrice + (selectedOption.priceModifier || 0)
+      : product.discountPrice;
+    const lineTotal = unitPrice * cartItem.quantity;
+
     group.items.push({
       product: product._id,
       name: product.name,
       image: product.images?.[0] || '',
       quantity: cartItem.quantity,
-      price: product.discountPrice,
+      price: unitPrice,
+      variantLabel: selectedOption ? `${selectedGroup.name}: ${selectedOption.label}` : '',
+      variantOptionId: selectedOption ? selectedOption._id.toString() : '',
+      variantSku: selectedOption ? selectedOption.sku : '',
     });
     group.itemsPrice += lineTotal;
   }
@@ -136,9 +202,7 @@ exports.checkout = catchAsyncErrors(async (req, res, next) => {
     // No payment gate — reduce stock immediately.
     for (const group of groups.values()) {
       for (const item of group.items) {
-        await Product.findByIdAndUpdate(item.product, {
-          $inc: { stock: -item.quantity, soldOut: item.quantity },
-        });
+        await adjustProductStock(item, -item.quantity);
       }
     }
 
@@ -230,9 +294,7 @@ exports.stripeWebhook = catchAsyncErrors(async (req, res, next) => {
       await order.save();
 
       for (const item of order.items) {
-        await Product.findByIdAndUpdate(item.product, {
-          $inc: { stock: -item.quantity, soldOut: item.quantity },
-        });
+        await adjustProductStock(item, -item.quantity);
       }
 
       if (order.buyer && order.buyer.email) {
@@ -387,9 +449,7 @@ exports.cancelOrder = catchAsyncErrors(async (req, res, next) => {
 
   // Restore stock for cancelled items
   for (const item of order.items) {
-    await Product.findByIdAndUpdate(item.product, {
-      $inc: { stock: item.quantity, soldOut: -item.quantity },
-    });
+    await adjustProductStock(item, item.quantity);
   }
 
   await order.save();

@@ -11,6 +11,24 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const variantOptionSchema = new mongoose.Schema(
+  {
+    label: { type: String, required: true }, // e.g. "Medium" or "Red"
+    priceModifier: { type: Number, default: 0 },
+    stock: { type: Number, default: 0 },
+    sku: { type: String, default: '' },
+  },
+  { _id: true }
+);
+
+const variantGroupSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true }, // e.g. "Size" or "Color"
+    options: [variantOptionSchema],
+  },
+  { _id: true }
+);
+
 const productSchema = new mongoose.Schema(
   {
     name: {
@@ -55,6 +73,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    variants: [variantGroupSchema],
     isActive: {
       type: Boolean,
       default: true,
