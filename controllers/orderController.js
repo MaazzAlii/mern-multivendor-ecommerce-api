@@ -333,3 +333,108 @@ exports.cancelOrder = catchAsyncErrors(async (req, res, next) => {
   await order.save();
   res.status(200).json({ success: true, order });
 });
+
+// @desc    Get shop analytics (revenue over time, top products, order status breakdown)
+// @route   GET /api/v1/analytics/shop
+// @access  Private/Seller
+exports.getShopAnalytics = catchAsyncErrors(async (req, res, next) => {
+  const Shop = require('../models/Shop');
+  const shop = await Shop.findOne({ owner: req.user.id });
+  if (!shop) {
+    return next(new ErrorHandler('You have not created a shop yet', 404));
+  }
+
+  const days = Math.max(1, parseInt(req.query.days, 10) || 30);
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+
+  const shopId = shop._id;
+
+  const revenueOverTime = await Order.aggregate([
+    {
+      $match: {
+        shop: shopId,
+        createdAt: { $gte: startDate },
+        status: { $ne: 'Cancelled' },
+      },
+    },
+    {
+      $group: {
+        _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+        revenue: { $sum: '$totalPrice' },
+        orders: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+    {
+      $project: {
+        _id: 0,
+        date: '$_id',
+        revenue: 1,
+        orders: 1,
+      },
+    },
+  ]);
+
+  const topProducts = await Order.aggregate([
+    {
+      $match: {
+        shop: shopId,
+        createdAt: { $gte: startDate },
+        status: { $ne: 'Cancelled' },
+      },
+    },
+    { $unwind: '$items' },
+    {
+      $group: {
+        _id: '$items.name',
+        unitsSold: { $sum: '$items.quantity' },
+        revenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } },
+      },
+    },
+    { $sort: { unitsSold: -1 } },
+    { $limit: 5 },
+    {
+      $project: {
+        _id: 0,
+        name: '$_id',
+        unitsSold: 1,
+        revenue: 1,
+      },
+    },
+  ]);
+
+  const statusCounts = await Order.aggregate([
+    {
+      $match: {
+        shop: shopId,
+        createdAt: { $gte: startDate },
+      },
+    },
+    {
+      $group: {
+        _id: '$status',
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const statusBreakdown = {
+    Processing: 0,
+    Shipped: 0,
+    Delivered: 0,
+    Cancelled: 0,
+  };
+  for (const item of statusCounts) {
+    if (item._id) {
+      statusBreakdown[item._id] = item.count;
+    }
+  }
+
+  res.status(200).json({
+    success: true,
+    revenueOverTime,
+    topProducts,
+    statusBreakdown,
+  });
+});
