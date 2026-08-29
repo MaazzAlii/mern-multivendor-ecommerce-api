@@ -5,6 +5,7 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Coupon = require('../models/Coupon');
 const getStripe = require('../utils/stripe');
+const sendEmail = require('../utils/mailer');
 
 const SHIPPING_FLAT_RATE = 150;
 
@@ -132,6 +133,20 @@ exports.checkout = catchAsyncErrors(async (req, res, next) => {
         });
       }
     }
+
+    for (const order of createdOrders) {
+      sendEmail({
+        to: req.user.email,
+        subject: `Order Placed Successfully (#${order._id})`,
+        html: `
+          <h1>Order Confirmation</h1>
+          <p>Hi ${req.user.name},</p>
+          <p>Your Cash On Delivery order <strong>#${order._id}</strong> has been successfully placed!</p>
+          <p><strong>Total Amount:</strong> Rs ${order.totalPrice}</p>
+          <p>Thank you for shopping with us!</p>
+        `,
+      });
+    }
     return res.status(201).json({ success: true, checkoutGroupId, orders: createdOrders });
   }
 
@@ -198,7 +213,7 @@ exports.stripeWebhook = catchAsyncErrors(async (req, res, next) => {
     const session = event.data.object;
     const { checkoutGroupId } = session.metadata;
 
-    const orders = await Order.find({ checkoutGroupId, 'paymentInfo.status': 'Not Paid' });
+    const orders = await Order.find({ checkoutGroupId, 'paymentInfo.status': 'Not Paid' }).populate('buyer', 'name email');
 
     for (const order of orders) {
       order.paymentInfo.status = 'Paid';
@@ -209,6 +224,20 @@ exports.stripeWebhook = catchAsyncErrors(async (req, res, next) => {
       for (const item of order.items) {
         await Product.findByIdAndUpdate(item.product, {
           $inc: { stock: -item.quantity, soldOut: item.quantity },
+        });
+      }
+
+      if (order.buyer && order.buyer.email) {
+        sendEmail({
+          to: order.buyer.email,
+          subject: `Payment Confirmed & Order Placed (#${order._id})`,
+          html: `
+            <h1>Payment Confirmation</h1>
+            <p>Hi ${order.buyer.name || 'Customer'},</p>
+            <p>Payment for order <strong>#${order._id}</strong> has been confirmed!</p>
+            <p><strong>Total Paid:</strong> Rs ${order.totalPrice}</p>
+            <p>Thank you for shopping with us!</p>
+          `,
         });
       }
     }
@@ -283,6 +312,31 @@ exports.updateOrderStatus = catchAsyncErrors(async (req, res, next) => {
     }
   }
   await order.save();
+
+  await order.populate('buyer', 'name email');
+  if (order.buyer && order.buyer.email) {
+    if (status === 'Shipped') {
+      sendEmail({
+        to: order.buyer.email,
+        subject: `Your Order Has Shipped! (#${order._id})`,
+        html: `
+          <h1>Order Shipped</h1>
+          <p>Hi ${order.buyer.name || 'Customer'},</p>
+          <p>Great news! Your order <strong>#${order._id}</strong> has been shipped and is on its way to you.</p>
+        `,
+      });
+    } else if (status === 'Delivered') {
+      sendEmail({
+        to: order.buyer.email,
+        subject: `Your Order Has Been Delivered! (#${order._id})`,
+        html: `
+          <h1>Order Delivered</h1>
+          <p>Hi ${order.buyer.name || 'Customer'},</p>
+          <p>Your order <strong>#${order._id}</strong> has been successfully delivered. Enjoy your purchase!</p>
+        `,
+      });
+    }
+  }
 
   res.status(200).json({ success: true, order });
 });
