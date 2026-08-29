@@ -8,6 +8,8 @@ const {
   changePassword,
   forgotPassword,
   resetPassword,
+  verifyEmail,
+  resendVerificationEmail,
 } = require('../controllers/authController');
 const { isAuthenticatedUser } = require('../middleware/auth');
 
@@ -15,6 +17,8 @@ const router = express.Router();
 
 router.route('/register').post(registerUser);
 router.route('/login').post(loginUser);
+router.route('/verify-email/:token').get(verifyEmail);
+router.route('/resend-verification').post(isAuthenticatedUser, resendVerificationEmail);
 router.route('/forgot-password').post(forgotPassword);
 router.route('/reset-password/:token').put(resetPassword);
 router.route('/me').get(isAuthenticatedUser, getUserDetails).put(isAuthenticatedUser, updateProfile);

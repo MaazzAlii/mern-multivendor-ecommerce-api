@@ -28,11 +28,29 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler('User with this email already exists', 400));
   }
 
+  const verifyToken = crypto.randomBytes(32).toString('hex');
+  const hashedVerificationToken = crypto.createHash('sha256').update(verifyToken).digest('hex');
+
   const user = await User.create({
     name,
     email,
     password,
     role: role === 'seller' ? 'seller' : 'buyer',
+    emailVerificationToken: hashedVerificationToken,
+    emailVerificationExpire: Date.now() + 24 * 60 * 60 * 1000,
+  });
+
+  const clientUrl = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/+$/, '');
+  const verificationUrl = `${clientUrl}/verify-email/${verifyToken}`;
+
+  sendEmail({
+    to: user.email,
+    subject: 'Email Verification',
+    html: `
+      <h1>Verify Your Email</h1>
+      <p>Thank you for registering! Please click the link below to verify your email address:</p>
+      <a href="${verificationUrl}">${verificationUrl}</a>
+    `,
   });
 
   sendToken(user, 201, res);
@@ -217,4 +235,63 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
   await user.save();
 
   res.status(200).json({ success: true, message: 'Password has been reset' });
+});
+
+// @desc    Verify email address using token
+// @route   GET /api/v1/verify-email/:token
+// @access  Public
+exports.verifyEmail = catchAsyncErrors(async (req, res, next) => {
+  const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+  const user = await User.findOne({
+    emailVerificationToken: hashedToken,
+    emailVerificationExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new ErrorHandler('Invalid or expired verification token', 400));
+  }
+
+  user.isEmailVerified = true;
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpire = undefined;
+
+  await user.save();
+
+  res.status(200).json({ success: true, message: 'Email verified successfully' });
+});
+
+// @desc    Resend email verification link
+// @route   POST /api/v1/resend-verification
+// @access  Private
+exports.resendVerificationEmail = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return next(new ErrorHandler('User not found', 404));
+  }
+
+  if (user.isEmailVerified) {
+    return next(new ErrorHandler('Email is already verified', 400));
+  }
+
+  const verifyToken = crypto.randomBytes(32).toString('hex');
+  user.emailVerificationToken = crypto.createHash('sha256').update(verifyToken).digest('hex');
+  user.emailVerificationExpire = Date.now() + 24 * 60 * 60 * 1000;
+
+  await user.save({ validateBeforeSave: false });
+
+  const clientUrl = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/+$/, '');
+  const verificationUrl = `${clientUrl}/verify-email/${verifyToken}`;
+
+  await sendEmail({
+    to: user.email,
+    subject: 'Email Verification',
+    html: `
+      <h1>Verify Your Email</h1>
+      <p>Please click the link below to verify your email address:</p>
+      <a href="${verificationUrl}">${verificationUrl}</a>
+    `,
+  });
+
+  res.status(200).json({ success: true, message: 'Verification email sent' });
 });

@@ -5,9 +5,9 @@
 
 ## Overview Progress
 - **Total Prompts**: 18
-- **Completed**: 8 / 18
+- **Completed**: 9 / 18 (50% Complete!)
 - **In Progress**: None
-- **Next**: `05_email_verification.md`
+- **Next**: `08_validation_middleware.md`
 
 ---
 
@@ -24,7 +24,7 @@
 ### Tier B — Production Hardening
 - [x] `04_util_mailer.md` — Reusable Nodemailer Utility
 - [x] `03_password_reset_flow.md` — Password Reset Flow
-- [ ] `05_email_verification.md` — Email Verification Flow
+- [x] `05_email_verification.md` — Email Verification Flow
 - [ ] `08_validation_middleware.md` — Request Validation Middleware
 - [ ] `09_rate_limiting.md` — API Rate Limiting
 - [ ] `10_refresh_tokens.md` — JWT Refresh Tokens
@@ -51,4 +51,5 @@
 | 2026-08-30 | `17_related_products.md` | `63ad0c2` | Added related products endpoint (`GET /product/:id/related`) |
 | 2026-08-30 | `18_review_moderation.md` | `c3b928a` | Added review `isHidden` field, admin moderation endpoint, and public filtering |
 | 2026-08-30 | `04_util_mailer.md` | `bc87a66` | Added reusable Nodemailer `sendEmail` utility and SMTP env configs |
-| 2026-08-30 | `03_password_reset_flow.md` | Pending | Added forgot password email link generation and reset password token flow |
+| 2026-08-30 | `03_password_reset_flow.md` | `ae0cfca` | Added forgot password email link generation and reset password token flow |
+| 2026-08-30 | `05_email_verification.md` | Pending | Added email verification token generation, verification endpoint, and resend verification email |
