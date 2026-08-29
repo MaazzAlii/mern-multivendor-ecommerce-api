@@ -16,10 +16,10 @@ exports.createWithdrawRequest = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler('Please enter a valid withdrawal amount', 400));
   }
 
-  // Available balance = revenue from delivered/paid orders minus amounts already
+  // Available balance = sellerEarnings from delivered/paid orders minus amounts already
   // requested (Processing or Approved), so a seller can't over-withdraw.
   const deliveredOrders = await Order.find({ shop: shop._id, status: 'Delivered' });
-  const totalEarnings = deliveredOrders.reduce((sum, o) => sum + o.totalPrice, 0);
+  const totalEarnings = deliveredOrders.reduce((sum, o) => sum + (o.sellerEarnings || o.totalPrice), 0);
 
   const priorWithdrawals = await Withdraw.find({ shop: shop._id, status: { $in: ['Processing', 'Approved'] } });
   const alreadyWithdrawn = priorWithdrawals.reduce((sum, w) => sum + w.amount, 0);
@@ -47,7 +47,7 @@ exports.getMyWithdrawals = catchAsyncErrors(async (req, res, next) => {
   if (!shop) return next(new ErrorHandler('You have not created a shop yet', 404));
 
   const deliveredOrders = await Order.find({ shop: shop._id, status: 'Delivered' });
-  const totalEarnings = deliveredOrders.reduce((sum, o) => sum + o.totalPrice, 0);
+  const totalEarnings = deliveredOrders.reduce((sum, o) => sum + (o.sellerEarnings || o.totalPrice), 0);
 
   const withdrawals = await Withdraw.find({ shop: shop._id }).sort({ createdAt: -1 });
   const alreadyWithdrawn = withdrawals

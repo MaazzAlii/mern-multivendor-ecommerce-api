@@ -4,6 +4,7 @@ const ErrorHandler = require('../utils/ErrorHandler');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Coupon = require('../models/Coupon');
+const PlatformSettings = require('../models/PlatformSettings');
 const getStripe = require('../utils/stripe');
 const sendEmail = require('../utils/mailer');
 
@@ -108,6 +109,11 @@ exports.checkout = catchAsyncErrors(async (req, res, next) => {
 
     const totalPrice = group.itemsPrice - discountAmount + shippingPrice;
 
+    // Platform Commission: Commission applies to net itemsPrice (after coupon). Shipping passes through to seller untouched.
+    const settings = await PlatformSettings.getSettings();
+    const commissionAmount = Math.round((group.itemsPrice - discountAmount) * (settings.commissionPercent / 100));
+    const sellerEarnings = group.itemsPrice - discountAmount - commissionAmount + shippingPrice;
+
     const order = await Order.create({
       checkoutGroupId,
       buyer: req.user.id,
@@ -119,6 +125,8 @@ exports.checkout = catchAsyncErrors(async (req, res, next) => {
       totalPrice,
       couponCode: appliedCouponCode,
       discountAmount,
+      commissionAmount,
+      sellerEarnings,
       paymentInfo: { method: paymentMethod, status: 'Not Paid' },
     });
     createdOrders.push(order);

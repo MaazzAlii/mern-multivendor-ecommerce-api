@@ -60,6 +60,14 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    commissionAmount: {
+      type: Number,
+      default: 0,
+    },
+    sellerEarnings: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

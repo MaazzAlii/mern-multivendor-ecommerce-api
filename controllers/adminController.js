@@ -74,3 +74,29 @@ exports.getAllProductsAdmin = catchAsyncErrors(async (req, res, next) => {
   const products = await Product.find().populate('shop', 'name').sort({ createdAt: -1 });
   res.status(200).json({ success: true, count: products.length, products });
 });
+
+const PlatformSettings = require('../models/PlatformSettings');
+
+// @desc    Get platform settings
+// @route   GET /api/v1/admin/settings
+// @access  Private/Admin
+exports.getPlatformSettings = catchAsyncErrors(async (req, res, next) => {
+  const settings = await PlatformSettings.getSettings();
+  res.status(200).json({ success: true, settings });
+});
+
+// @desc    Update platform settings
+// @route   PUT /api/v1/admin/settings
+// @access  Private/Admin
+exports.updatePlatformSettings = catchAsyncErrors(async (req, res, next) => {
+  const { commissionPercent } = req.body;
+  if (commissionPercent === undefined || commissionPercent < 0 || commissionPercent > 100) {
+    return next(new ErrorHandler('commissionPercent must be a number between 0 and 100', 400));
+  }
+
+  let settings = await PlatformSettings.getSettings();
+  settings.commissionPercent = commissionPercent;
+  await settings.save();
+
+  res.status(200).json({ success: true, settings });
+});

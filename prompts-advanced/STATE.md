@@ -5,9 +5,9 @@
 
 ## Overview Progress
 - **Total Prompts**: 18
-- **Completed**: 16 / 18 (89% Complete!)
+- **Completed**: 17 / 18 (94% Complete!)
 - **In Progress**: None
-- **Next**: `14_platform_commission.md`
+- **Next**: `15_product_variants.md`
 
 ---
 
@@ -34,7 +34,7 @@
 - [x] `16_order_status_email_hooks.md` — Order Status Email Notifications
 
 ### Tier C — Structural & Business Features
-- [ ] `14_platform_commission.md` — Admin Platform Commission Logic
+- [x] `14_platform_commission.md` — Admin Platform Commission Logic
 - [ ] `15_product_variants.md` — Product Variants & Multi-SKU Support
 
 ---
@@ -59,4 +59,5 @@
 | 2026-08-30 | `11_security_headers_sanitization.md` | `d771997` | Added Helmet security headers, Mongo Sanitize for NoSQL injection, and XSS sanitization |
 | 2026-08-30 | `12_logging.md` | `7276501` | Added Winston structured logger and Morgan HTTP request logging |
 | 2026-08-30 | `13_testing_setup.md` | `5eb3dd6` | Added Jest, Supertest & mongodb-memory-server test suite (10/10 tests passing) |
-| 2026-08-30 | `16_order_status_email_hooks.md` | Pending | Added email hooks for order placement, payment confirmation, shipping & delivery |
+| 2026-08-30 | `16_order_status_email_hooks.md` | `8456ef0` | Added email hooks for order placement, payment confirmation, shipping & delivery |
+| 2026-08-30 | `14_platform_commission.md` | Pending | Added PlatformSettings model, order commission calculation, withdraw net earnings balance, and admin settings routes |

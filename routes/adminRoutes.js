@@ -6,6 +6,8 @@ const {
   getAllShopsAdmin,
   deleteShopAdmin,
   getAllProductsAdmin,
+  getPlatformSettings,
+  updatePlatformSettings,
 } = require('../controllers/adminController');
 const { getAllOrdersAdmin } = require('../controllers/orderController');
 const { toggleReviewVisibility } = require('../controllers/productController');
@@ -16,6 +18,7 @@ const router = express.Router();
 router.use('/admin', isAuthenticatedUser, authorizeRoles('admin'));
 
 router.route('/admin/stats').get(getDashboardStats);
+router.route('/admin/settings').get(getPlatformSettings).put(updatePlatformSettings);
 router.route('/admin/users').get(getAllUsers);
 router.route('/admin/user/:id').delete(deleteUser);
 router.route('/admin/shops').get(getAllShopsAdmin);
