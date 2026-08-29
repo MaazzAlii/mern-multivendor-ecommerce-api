@@ -83,3 +83,52 @@ exports.addAddress = catchAsyncErrors(async (req, res, next) => {
 
   res.status(200).json({ success: true, addresses: user.addresses });
 });
+
+// @desc    Update logged-in user's profile (name, avatar)
+// @route   PUT /api/v1/me
+// @access  Private
+exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
+  const { name, avatar } = req.body;
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    return next(new ErrorHandler('User not found', 404));
+  }
+
+  if (name !== undefined) user.name = name;
+  if (avatar !== undefined) user.avatar = avatar;
+
+  await user.save();
+
+  res.status(200).json({ success: true, user });
+});
+
+// @desc    Change logged-in user's password
+// @route   PUT /api/v1/me/password
+// @access  Private
+exports.changePassword = catchAsyncErrors(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return next(new ErrorHandler('Please provide currentPassword and newPassword', 400));
+  }
+
+  if (newPassword.length < 6) {
+    return next(new ErrorHandler('Password should be at least 6 characters', 400));
+  }
+
+  const user = await User.findById(req.user.id).select('+password');
+  if (!user) {
+    return next(new ErrorHandler('User not found', 404));
+  }
+
+  const isMatched = await user.comparePassword(currentPassword);
+  if (!isMatched) {
+    return next(new ErrorHandler('Current password is incorrect', 401));
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  res.status(200).json({ success: true, message: 'Password updated' });
+});

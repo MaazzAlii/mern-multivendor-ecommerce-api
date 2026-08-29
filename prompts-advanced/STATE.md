@@ -5,9 +5,9 @@
 
 ## Overview Progress
 - **Total Prompts**: 18
-- **Completed**: 1 / 18
+- **Completed**: 2 / 18
 - **In Progress**: None
-- **Next**: `02_profile_update_and_password_change.md`
+- **Next**: `06_order_cancellation_and_returns.md`
 
 ---
 
@@ -15,7 +15,7 @@
 
 ### Tier A — Polish
 - [x] `01_product_pagination_sort_filter.md` — Product Pagination, Sorting & Price Filtering
-- [ ] `02_profile_update_and_password_change.md` — Profile Update & Password Change
+- [x] `02_profile_update_and_password_change.md` — Profile Update & Password Change
 - [ ] `06_order_cancellation_and_returns.md` — Order Cancellation & Return Requests
 - [ ] `07_seller_analytics.md` — Seller Analytics Endpoint
 - [ ] `17_related_products.md` — Related Products Endpoint
@@ -44,4 +44,5 @@
 | Date | Prompt | Commit Hash | Summary |
 |---|---|---|---|
 | 2026-08-30 | Initialized State | `e08347c` | Added state files & initialized execution workflow |
-| 2026-08-30 | `01_product_pagination_sort_filter.md` | Pending | Added pagination, sorting, price filtering, and metadata to `getAllProducts` |
+| 2026-08-30 | `01_product_pagination_sort_filter.md` | `c74c47d` | Added pagination, sorting, price filtering, and metadata to `getAllProducts` |
+| 2026-08-30 | `02_profile_update_and_password_change.md` | Pending | Added profile update (`PUT /me`) & password change (`PUT /me/password`) |
