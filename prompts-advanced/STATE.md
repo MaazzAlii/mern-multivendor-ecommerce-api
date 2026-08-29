@@ -5,9 +5,9 @@
 
 ## Overview Progress
 - **Total Prompts**: 18
-- **Completed**: 7 / 18
+- **Completed**: 8 / 18
 - **In Progress**: None
-- **Next**: `03_password_reset_flow.md`
+- **Next**: `05_email_verification.md`
 
 ---
 
@@ -23,7 +23,7 @@
 
 ### Tier B — Production Hardening
 - [x] `04_util_mailer.md` — Reusable Nodemailer Utility
-- [ ] `03_password_reset_flow.md` — Password Reset Flow
+- [x] `03_password_reset_flow.md` — Password Reset Flow
 - [ ] `05_email_verification.md` — Email Verification Flow
 - [ ] `08_validation_middleware.md` — Request Validation Middleware
 - [ ] `09_rate_limiting.md` — API Rate Limiting
@@ -50,4 +50,5 @@
 | 2026-08-30 | `07_seller_analytics.md` | `1e20509` | Added seller analytics endpoint (`GET /analytics/shop`) |
 | 2026-08-30 | `17_related_products.md` | `63ad0c2` | Added related products endpoint (`GET /product/:id/related`) |
 | 2026-08-30 | `18_review_moderation.md` | `c3b928a` | Added review `isHidden` field, admin moderation endpoint, and public filtering |
-| 2026-08-30 | `04_util_mailer.md` | Pending | Added reusable Nodemailer `sendEmail` utility and SMTP env configs |
+| 2026-08-30 | `04_util_mailer.md` | `bc87a66` | Added reusable Nodemailer `sendEmail` utility and SMTP env configs |
+| 2026-08-30 | `03_password_reset_flow.md` | Pending | Added forgot password email link generation and reset password token flow |

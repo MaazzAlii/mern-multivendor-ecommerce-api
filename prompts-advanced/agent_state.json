@@ -1,7 +1,7 @@
 {
   "project": "Multi-vendor MERN e-commerce API",
   "phase": "prompts-advanced",
-  "last_updated": "2026-08-30T02:15:39.000Z",
+  "last_updated": "2026-08-30T02:16:42.000Z",
   "status": "in_progress",
   "current_prompt": null,
   "completed_prompts": [
@@ -11,10 +11,10 @@
     "07_seller_analytics.md",
     "17_related_products.md",
     "18_review_moderation.md",
-    "04_util_mailer.md"
+    "04_util_mailer.md",
+    "03_password_reset_flow.md"
   ],
   "pending_prompts": [
-    "03_password_reset_flow.md",
     "05_email_verification.md",
     "08_validation_middleware.md",
     "09_rate_limiting.md",
@@ -94,6 +94,16 @@
         "package.json",
         "package-lock.json",
         ".env.example"
+      ]
+    },
+    {
+      "prompt": "03_password_reset_flow.md",
+      "status": "completed",
+      "timestamp": "2026-08-30T02:16:42.000Z",
+      "files_changed": [
+        "models/User.js",
+        "controllers/authController.js",
+        "routes/authRoutes.js"
       ]
     }
   ]
