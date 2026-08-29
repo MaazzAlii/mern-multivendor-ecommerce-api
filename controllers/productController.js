@@ -4,7 +4,7 @@ const Product = require('../models/Product');
 const Shop = require('../models/Shop');
 const Order = require('../models/Order');
 
-// @desc    Get all active products (supports ?keyword=, ?category=, ?shop=)
+// @desc    Get all active products (supports ?keyword=, ?category=, ?shop=, ?page=, ?limit=, ?sort=, ?minPrice=, ?maxPrice=)
 // @route   GET /api/v1/products
 // @access  Public
 exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
@@ -13,8 +13,47 @@ exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
   if (req.query.category) filter.category = req.query.category;
   if (req.query.shop) filter.shop = req.query.shop;
 
-  const products = await Product.find(filter).populate('shop', 'name').sort({ createdAt: -1 });
-  res.status(200).json({ success: true, count: products.length, products });
+  if (req.query.minPrice !== undefined || req.query.maxPrice !== undefined) {
+    filter.discountPrice = {};
+    if (req.query.minPrice !== undefined && req.query.minPrice !== '') {
+      filter.discountPrice.$gte = Number(req.query.minPrice);
+    }
+    if (req.query.maxPrice !== undefined && req.query.maxPrice !== '') {
+      filter.discountPrice.$lte = Number(req.query.maxPrice);
+    }
+  }
+
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limitParam = parseInt(req.query.limit, 10) || 12;
+  const limit = Math.min(50, Math.max(1, limitParam));
+
+  let sortOption = { createdAt: -1 };
+  if (req.query.sort === 'price_asc') {
+    sortOption = { discountPrice: 1 };
+  } else if (req.query.sort === 'price_desc') {
+    sortOption = { discountPrice: -1 };
+  } else if (req.query.sort === 'rating') {
+    sortOption = { ratings: -1 };
+  } else if (req.query.sort === 'newest') {
+    sortOption = { createdAt: -1 };
+  }
+
+  const totalCount = await Product.countDocuments(filter);
+  const totalPages = Math.ceil(totalCount / limit);
+
+  const products = await Product.find(filter)
+    .populate('shop', 'name')
+    .sort(sortOption)
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  res.status(200).json({
+    success: true,
+    products,
+    page,
+    totalPages,
+    totalCount,
+  });
 });
 
 // @desc    Get a single product
